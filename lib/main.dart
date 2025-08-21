@@ -1,79 +1,82 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'login_page.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter & Express Example',
+      title: 'NeoGig',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.green,
       ),
-      home: MyHomePage(),
+      home: const RoleSelectionPage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  String data = 'Loading...';
-
-  @override
-  void initState() {
-    super.initState();
-    fetchData();
-  }
-
-  // Fetch data from your Express API
-  Future<void> fetchData() async {
-    final response = await http.get(Uri.parse('http://localhost:1060/'));
-
-    if (response.statusCode == 200) {
-      setState(() {
-        data = response.body; // Show the response from the backend
-      });
-    } else {
-      setState(() {
-        data = 'Failed to load data from backend';
-      });
-    }
-  }
+class RoleSelectionPage extends StatelessWidget {
+  const RoleSelectionPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Flutter & Express Demo'),
+        // title: const Text('Select Your Role'),
       ),
-      body: Center(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'Data from backend:',
-              style: TextStyle(fontSize: 24),
+          children: [
+            const Text('Select Your Role', style: TextStyle(fontSize: 24),),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              height: 80,
+              child: ElevatedButton(
+                onPressed: () {
+                  // Navigate to login page with role = Company
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => LoginPage(userRole: 'Company'),
+                    ),
+                  );
+                },
+                child: const Text(
+                  'Company',
+                  style: TextStyle(fontSize: 24),
+                ),
+              ),
             ),
-            SizedBox(height: 20),
-            Text(
-              data,  // Show fetched data
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            const SizedBox(height: 30),
+            SizedBox(
+              width: double.infinity,
+              height: 80,
+              child: ElevatedButton(
+                onPressed: () {
+                  // Navigate to login page with role = Job Seeker
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => LoginPage(userRole: 'Job Seeker'),
+                    ),
+                  );
+                },
+                child: const Text(
+                  'Job Seeker',
+                  style: TextStyle(fontSize: 24),
+                ),
+              ),
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: fetchData,  // Fetch data again when button is pressed
-        tooltip: 'Reload Data',
-        child: Icon(Icons.refresh),
       ),
     );
   }

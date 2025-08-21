@@ -1,9 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:neogig0/login_page.dart';
+import 'package:neogig0/widgets/custom_drawer.dart';
 
 class SignUpCompanyPage extends StatefulWidget {
-  const SignUpCompanyPage({super.key});
+  final String userRole;
+  const SignUpCompanyPage({super.key, required this.userRole});
 
   @override
   State<SignUpCompanyPage> createState() => _SignUpCompanyPageState();
@@ -41,7 +44,9 @@ class _SignUpCompanyPageState extends State<SignUpCompanyPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Company created successfully!")),
       );
-      Navigator.pop(context);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => LoginPage(userRole: widget.userRole)),);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: ${response.body}")),
@@ -53,6 +58,7 @@ class _SignUpCompanyPageState extends State<SignUpCompanyPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Company Sign Up")),
+      drawer: CustomDrawer(userRole: 'Not Logged'),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

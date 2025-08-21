@@ -1,21 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'login_page.dart';
+import 'home_page.dart';
+import 'package:neogig0/widgets/custom_drawer.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('authToken');
+  final role = prefs.getString('userRole');
+
+  runApp(MyApp(
+    token: token,
+    role: role,
+  ));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final String? token;
+  final String? role;
+
+  const MyApp({super.key, this.token, this.role});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'NeoGig',
-      theme: ThemeData(
-        primarySwatch: Colors.green,
-      ),
-      home: const RoleSelectionPage(),
+      theme: ThemeData(primarySwatch: Colors.green),
+      // Decide the first page based on token/role
+      home: (token != null && role != null)
+          ? HomePage(userRole: role!)
+          : const RoleSelectionPage(),
     );
   }
 }
@@ -29,6 +44,7 @@ class RoleSelectionPage extends StatelessWidget {
       appBar: AppBar(
         // title: const Text('Select Your Role'),
       ),
+      drawer: CustomDrawer(userRole: 'Not Logged'),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

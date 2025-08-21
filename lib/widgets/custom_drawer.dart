@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:neogig0/main.dart';
-// import other pages if needed
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CustomDrawer extends StatelessWidget {
   final String userRole; // Pass this variable to control visibility
 
-  // Constructor accepting the userRole
   const CustomDrawer({super.key, required this.userRole});
 
   @override
@@ -19,35 +18,34 @@ class CustomDrawer extends StatelessWidget {
               color: Colors.green,
             ),
             child: Text(
-              'Menu',
+              'NeoGig',
               style: TextStyle(fontSize: 20),
             ),
           ),
           ListTile(
-            title: const Text('Map'),
+            title: const Text('About Us'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => MyApp()),
-              );
             },
           ),
-          // Conditionally show/hide this item based on userRole
-          if (userRole == 'admin') // For example, if the userRole is 'admin'
+          ListTile(
+            title: const Text('FAQ'),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+          if (userRole == 'Company' || userRole == 'Job Seeker')
             ListTile(
-              title: const Text('Admin Panel'),
-              onTap: () {
-                Navigator.pop(context);
-                // Navigate to the Admin Panel or any other page
-              },
-            ),
-          if (userRole == 'user') // For example, if the userRole is 'user'
-            ListTile(
-              title: const Text('User Settings'),
-              onTap: () {
-                Navigator.pop(context);
-                // Navigate to the User Settings page
+              title: const Text('Logout'),
+              onTap: () async {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.remove('authToken'); // Clear session
+                await prefs.remove('userRole');
+
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RoleSelectionPage()),
+                );
               },
             ),
         ],

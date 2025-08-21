@@ -6,6 +6,7 @@ const app = express();
 
 // Import routes
 const signupRoutes = require('./routes/signup');
+const loginRoutes = require('./routes/login');
 
 // Middleware
 app.use(cors());
@@ -14,7 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Use routes
 app.use('/api/signup', signupRoutes);
-
+app.use('/api/login', loginRoutes);
 
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI)

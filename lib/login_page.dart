@@ -1,28 +1,41 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'signup_company_page.dart';
-import 'signup_jobseeker_page.dart';
-import 'home_page.dart';
+import 'package:neogig0/signup_company_page.dart';
+import 'package:neogig0/signup_jobseeker_page.dart';
+import 'package:neogig0/home_page.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:neogig0/widgets/custom_drawer.dart';
+import 'package:neogig0/company_profile_page.dart';
 
-
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   final String userRole; // Receive role from previous page
+  const LoginPage({super.key, required this.userRole});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-
-  LoginPage({super.key, required this.userRole});
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final userRole = widget.userRole;
+
     return Scaffold(
       appBar: AppBar(
-        // title: Text('$userRole Login'), // Show role in the AppBar
-      ),
+          // title: Text('$userRole Login'), // Show role in the AppBar
+          ),
       drawer: CustomDrawer(userRole: 'Not Logged'),
       body: Center(
         child: Padding(
@@ -62,21 +75,22 @@ class LoginPage extends StatelessWidget {
 
                     if (email.isEmpty || password.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please enter email and password')),
+                        const SnackBar(
+                            content:
+                                Text('Please enter email and password')),
                       );
                       return;
                     }
 
-                    final url = Uri.parse(
-                      userRole == 'Company'
+                    final url = Uri.parse(userRole == 'Company'
                         ? 'http://10.0.2.2:1060/api/login/company'
-                        : 'http://10.0.2.2:1060/api/login/jobseeker'
-                    );
+                        : 'http://10.0.2.2:1060/api/login/jobseeker');
 
                     final response = await http.post(
                       url,
                       headers: {'Content-Type': 'application/json'},
-                      body: jsonEncode({'email': email, 'password': password}),
+                      body: jsonEncode(
+                          {'email': email, 'password': password}),
                     );
 
                     if (response.statusCode == 200) {
@@ -84,21 +98,37 @@ class LoginPage extends StatelessWidget {
                       final token = data['token'];
 
                       // Store token locally for session persistence
-                      final prefs = await SharedPreferences.getInstance();
+                      final prefs =
+                          await SharedPreferences.getInstance();
                       await prefs.setString('authToken', token);
                       await prefs.setString('userRole', userRole);
 
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Login successful!')),
+                        const SnackBar(
+                            content: Text('Login successful!')),
                       );
 
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (_) => HomePage(userRole: userRole)), // Create your home page
+                        MaterialPageRoute(
+                          builder: (_) {
+                            if (userRole == 'Company') {
+                              return CompanyProfilePage(userRole: userRole);
+                            } else if (userRole == 'JobSeeker') {
+                              return HomePage(userRole: userRole);
+                            } else {
+                              // If for some reason the user role is invalid, you could add a fallback or error page
+                              return const Scaffold(
+                                body: Center(child: Text('Invalid Role')),
+                              );
+                            }
+                          },
+                        ),
                       );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Error: ${response.body}')),
+                        SnackBar(
+                            content: Text('Error: ${response.body}')),
                       );
                     }
                   },
@@ -112,7 +142,8 @@ class LoginPage extends StatelessWidget {
               RichText(
                 text: TextSpan(
                   text: "Don't Have an Account? ",
-                  style: const TextStyle(color: Colors.black, fontSize: 16),
+                  style:
+                      const TextStyle(color: Colors.black, fontSize: 16),
                   children: [
                     TextSpan(
                       text: 'Sign Up',
@@ -126,16 +157,23 @@ class LoginPage extends StatelessWidget {
                           if (userRole == 'Company') {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (_) => SignUpCompanyPage(userRole: userRole,)),
+                              MaterialPageRoute(
+                                  builder: (_) => SignUpCompanyPage(
+                                        userRole: userRole,
+                                      )),
                             );
-                          } else if (userRole == 'Job Seeker') {
+                          } else if (userRole == 'JobSeeker') {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (_) => SignUpJobSeekerPage(userRole: userRole,)),
+                              MaterialPageRoute(
+                                  builder: (_) => SignUpJobSeekerPage(
+                                        userRole: userRole,
+                                      )),
                             );
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Unknown role')),
+                              const SnackBar(
+                                  content: Text('Unknown role')),
                             );
                           }
                         },

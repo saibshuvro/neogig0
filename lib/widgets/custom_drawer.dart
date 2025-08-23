@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:neogig0/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:neogig0/company_profile_page.dart';
+import 'package:neogig0/jobseeker_profile_page.dart';
 
 class CustomDrawer extends StatelessWidget {
   final String userRole; // Pass this variable to control visibility
@@ -22,6 +24,36 @@ class CustomDrawer extends StatelessWidget {
               style: TextStyle(fontSize: 20),
             ),
           ),
+          if (userRole == 'Company')
+            ListTile(
+              title: const Text('Profile'),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => CompanyProfilePage(userRole: userRole)),
+                );
+              },
+            ),
+          if (userRole == 'Company')
+            ListTile(
+              title: const Text('Create Job'),
+              onTap: () {
+                // Navigator.pushReplacement(
+                //   context,
+                //   MaterialPageRoute(builder: (_) => CompanyProfilePage(userRole: userRole)),
+                // );
+              },
+            ),
+          if (userRole == 'JobSeeker')
+            ListTile(
+              title: const Text('Profile'),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => JobSeekerProfilePage(userRole: userRole)),
+                );
+              },
+            ),
           ListTile(
             title: const Text('About Us'),
             onTap: () {
@@ -34,7 +66,7 @@ class CustomDrawer extends StatelessWidget {
               Navigator.pop(context);
             },
           ),
-          if (userRole == 'Company' || userRole == 'Job Seeker')
+          if (userRole == 'Company' || userRole == 'JobSeeker')
             ListTile(
               title: const Text('Logout'),
               onTap: () async {

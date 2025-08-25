@@ -3,6 +3,7 @@ import 'package:neogig0/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:neogig0/company_profile_page.dart';
 import 'package:neogig0/jobseeker_profile_page.dart';
+import 'package:neogig0/create_job_page.dart';
 
 class CustomDrawer extends StatelessWidget {
   final String userRole; // Pass this variable to control visibility
@@ -17,7 +18,7 @@ class CustomDrawer extends StatelessWidget {
         children: [
           const DrawerHeader(
             decoration: BoxDecoration(
-              color: Colors.green,
+              color: Colors.grey,
             ),
             child: Text(
               'NeoGig',
@@ -37,6 +38,16 @@ class CustomDrawer extends StatelessWidget {
           if (userRole == 'Company')
             ListTile(
               title: const Text('Create Job'),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => CreateJobPage(userRole: userRole)),
+                );
+              },
+            ),
+          if (userRole == 'Company')
+            ListTile(
+              title: const Text('Posted Jobs'),
               onTap: () {
                 // Navigator.pushReplacement(
                 //   context,

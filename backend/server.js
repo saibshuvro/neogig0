@@ -9,6 +9,7 @@ const signupRoutes = require('./routes/signup');
 const loginRoutes = require('./routes/login');
 const companyRoutes = require('./routes/company');
 const jobSeekerRoutes = require('./routes/jobseeker');
+const jobRoutes = require('./routes/job');
 
 // Middleware
 app.use(cors());
@@ -20,6 +21,7 @@ app.use('/api/signup', signupRoutes);
 app.use('/api/login', loginRoutes);
 app.use('/api/company', companyRoutes);
 app.use('/api/jobseeker', jobSeekerRoutes);
+app.use('/api/job', jobRoutes);
 
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI)

@@ -4,6 +4,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:neogig0/company_profile_page.dart';
 import 'package:neogig0/jobseeker_profile_page.dart';
 import 'package:neogig0/create_job_page.dart';
+import 'package:neogig0/posted_jobs_page.dart';
+import 'package:neogig0/home_page.dart';
+import 'package:neogig0/saved_jobs_page.dart';
 
 class CustomDrawer extends StatelessWidget {
   final String userRole; // Pass this variable to control visibility
@@ -49,10 +52,20 @@ class CustomDrawer extends StatelessWidget {
             ListTile(
               title: const Text('Posted Jobs'),
               onTap: () {
-                // Navigator.pushReplacement(
-                //   context,
-                //   MaterialPageRoute(builder: (_) => CompanyProfilePage(userRole: userRole)),
-                // );
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => PostedJobsPage(userRole: userRole)),
+                );
+              },
+            ),
+          if (userRole == 'JobSeeker')
+            ListTile(
+              title: const Text('Home'),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => HomePage(userRole: userRole)),
+                );
               },
             ),
           if (userRole == 'JobSeeker')
@@ -62,6 +75,16 @@ class CustomDrawer extends StatelessWidget {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (_) => JobSeekerProfilePage(userRole: userRole)),
+                );
+              },
+            ),
+          if (userRole == 'JobSeeker')
+            ListTile(
+              title: const Text('Saved Jobs'),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => SavedJobsPage(userRole: userRole)),
                 );
               },
             ),

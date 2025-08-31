@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const Job = require('../db/models/Job');
 const Company = require('../db/models/Company');
@@ -63,21 +64,6 @@ router.post('/create', auth, requireCompany, async (req, res) => {
 });
 
 /**
- * GET /api/job/:id
- * Retrieve a job listing by ID
- */
-router.get('/:id', async (req, res) => {
-  try {
-    const job = await Job.findById(req.params.id).populate('companyID', 'name');
-    if (!job) return res.status(404).json({ error: 'Job not found' });
-    res.json({ job });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-/**
  * PUT /api/job/:id
  * Update job listing details
  * body: { title?, pay?, description?, schedule?, isUrgent? }
@@ -122,5 +108,59 @@ router.delete('/:id', auth, requireCompany, async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+
+
+// GET /api/job/mine
+// List jobs created by the authenticated company
+router.get('/mine', auth, requireCompany, async (req, res) => {
+  try {
+    const companyId = req.user.id;
+
+    // Validate the companyId to make sure it's an ObjectId
+    if (!mongoose.isValidObjectId(companyId)) {
+      return res.status(400).json({ error: 'Invalid company id in token' });
+    }
+
+    // Fetch all jobs created by this company
+    const jobs = await Job.find({ companyID: companyId }).sort({ postedOn: -1 });
+
+    res.json({ jobs });
+  } catch (err) {
+    console.error('[GET /mine] Error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+/**
+ * GET /api/job/:id
+ */
+router.get('/:id', async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {          // <— validate
+      return res.status(400).json({ error: 'Invalid job id' });
+    }
+    const job = await Job.findById(req.params.id).populate('companyID', 'name');
+    if (!job) return res.status(404).json({ error: 'Job not found' });
+    res.json({ job });
+  } catch (err) {
+    console.error('[GET /:id] Error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+
+// GET /api/job
+router.get('/', async (req, res) => {
+  try {
+    const jobs = await Job.find()
+      .populate('companyID', 'name') // <-- add this
+      .sort({ postedOn: -1 });
+    res.json({ jobs });
+  } catch (err) {
+    console.error('[GET /] Error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 
 module.exports = router;

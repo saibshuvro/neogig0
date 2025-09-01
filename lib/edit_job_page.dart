@@ -6,7 +6,7 @@ import 'package:neogig0/widgets/custom_drawer.dart';
 
 class EditJobPage extends StatefulWidget {
   final String userRole; // pass "Company" here
-  final String jobId; // Job ID to edit
+  final String jobId;    // Job ID to edit
   const EditJobPage({super.key, required this.userRole, required this.jobId});
 
   @override
@@ -18,20 +18,76 @@ class _EditJobPageState extends State<EditJobPage> {
   final _title = TextEditingController();
   final _pay = TextEditingController();
   final _description = TextEditingController();
+
   bool _isUrgent = false;
   bool _loading = true;
   bool _saving = false;
 
-  List<bool> selectedDays = List.generate(7, (_) => false); // For days selection
-  bool isSameTime = true; // Whether all selected days have the same time
-  TextEditingController startHour = TextEditingController();
-  TextEditingController startMinute = TextEditingController();
-  TextEditingController startAmPm = TextEditingController();
-  TextEditingController endHour = TextEditingController();
-  TextEditingController endMinute = TextEditingController();
-  TextEditingController endAmPm = TextEditingController();
+  // Selected days (Mon..Sun)
+  List<bool> selectedDays = List.generate(7, (_) => false);
 
-  // Load job data when the page is loaded
+  // Single time block for ALL selected days
+  final TextEditingController startHour = TextEditingController();
+  final TextEditingController startMinute = TextEditingController();
+  final TextEditingController startAmPm = TextEditingController();
+  final TextEditingController endHour = TextEditingController();
+  final TextEditingController endMinute = TextEditingController();
+  final TextEditingController endAmPm = TextEditingController();
+
+  final List<String> _dayNames = const [
+    "Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    // sensible defaults
+    startHour.text = '9';
+    startMinute.text = '00';
+    startAmPm.text = 'AM';
+    endHour.text = '5';
+    endMinute.text = '00';
+    endAmPm.text = 'PM';
+    _load();
+  }
+
+  @override
+  void dispose() {
+    _title.dispose();
+    _pay.dispose();
+    _description.dispose();
+    startHour.dispose();
+    startMinute.dispose();
+    startAmPm.dispose();
+    endHour.dispose();
+    endMinute.dispose();
+    endAmPm.dispose();
+    super.dispose();
+  }
+
+  // Convert "HH:MM" (24h) -> (hour 1..12, "MM", "AM"/"PM")
+  void _from24To12(String hhmm, TextEditingController hCtrl, TextEditingController mCtrl, TextEditingController apCtrl) {
+    final parts = hhmm.split(':');
+    if (parts.length != 2) return;
+    int hh = int.tryParse(parts[0]) ?? 9;
+    final mm = parts[1].padLeft(2, '0');
+
+    final ampm = (hh >= 12) ? 'PM' : 'AM';
+    if (hh == 0) hh = 12;
+    else if (hh > 12) hh -= 12;
+
+    hCtrl.text = hh.toString();
+    mCtrl.text = mm;
+    apCtrl.text = ampm;
+  }
+
+  String _to24Hour(String hour, String minute, String ampm) {
+    int h = int.tryParse(hour) ?? 9;
+    if (ampm == 'PM' && h != 12) h += 12;
+    if (ampm == 'AM' && h == 12) h = 0;
+    return "${h.toString().padLeft(2, '0')}:${minute.padLeft(2, '0')}";
+  }
+
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -46,63 +102,68 @@ class _EditJobPageState extends State<EditJobPage> {
         final job = data['job'] as Map<String, dynamic>;
 
         _title.text = job['title'] ?? '';
-        _pay.text = job['pay'] ?? '';
+        _pay.text = job['pay'] ?? ''; // pay stays STRING
         _description.text = job['description'] ?? '';
         _isUrgent = job['isUrgent'] ?? false;
 
-        // Load schedule
-        final schedule = job['schedule'] as List<dynamic>;
-        for (var item in schedule) {
-          final dayIndex = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-              .indexOf(item['day']);
-          if (dayIndex != -1) {
-            selectedDays[dayIndex] = true;
-            startHour.text = item['time_start'].split(':')[0];
-            startMinute.text = item['time_start'].split(':')[1];
-            endHour.text = item['time_end'].split(':')[0];
-            endMinute.text = item['time_end'].split(':')[1];
+        // Days + time (use first schedule item's times if available)
+        selectedDays = List<bool>.filled(7, false);
+        final sched = (job['schedule'] ?? []) as List<dynamic>;
+        if (sched.isNotEmpty) {
+          // mark selected days
+          for (final it in sched) {
+            final idx = _dayNames.indexOf((it['day'] ?? '').toString());
+            if (idx != -1) selectedDays[idx] = true;
           }
+          // take first item's time as canonical (UI is single time block)
+          final first = sched.first as Map<String, dynamic>;
+          final ts = (first['time_start'] ?? '09:00').toString();
+          final te = (first['time_end'] ?? '17:00').toString();
+          _from24To12(ts, startHour, startMinute, startAmPm);
+          _from24To12(te, endHour, endMinute, endAmPm);
         }
+        if (mounted) setState(() {});
       } else {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Error: ${res.body}')));
+        if (mounted) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text('Error: ${res.body}')));
+        }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Network error: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Network error: $e')));
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
 
-  // Save the edited job information
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-    setState(() => _saving = true);
 
+    if (!selectedDays.contains(true)) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Select at least one day')));
+      return;
+    }
+
+    setState(() => _saving = true);
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('authToken');
 
-      // Prepare the job schedule
-      List<Map<String, String>> schedule = [];
-      String to24Hour(String hour, String minute, String ampm) {
-        int h = int.parse(hour);
-        if (ampm == 'PM' && h != 12) h += 12;
-        if (ampm == 'AM' && h == 12) h = 0;
-        return "${h.toString().padLeft(2, '0')}:${minute.padLeft(2, '0')}";
-      }
+      final start24 = _to24Hour(startHour.text, startMinute.text, startAmPm.text);
+      final end24   = _to24Hour(endHour.text, endMinute.text, endAmPm.text);
 
-      // If 'Same time for all selected days' is checked
-      if (isSameTime) {
-        for (int i = 0; i < 7; i++) {
-          if (selectedDays[i]) {
-            schedule.add({
-              "day": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][i],
-              "time_start": to24Hour(startHour.text, startMinute.text, startAmPm.text),
-              "time_end": to24Hour(endHour.text, endMinute.text, endAmPm.text),
-            });
-          }
+      final List<Map<String, String>> schedule = [];
+      for (int i = 0; i < 7; i++) {
+        if (selectedDays[i]) {
+          schedule.add({
+            "day": _dayNames[i],
+            "time_start": start24,
+            "time_end": end24,
+          });
         }
       }
 
@@ -113,42 +174,31 @@ class _EditJobPageState extends State<EditJobPage> {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'title': _title.text,
-          'pay': _pay.text,
-          'description': _description.text,
+          'title': _title.text.trim(),
+          'pay': _pay.text.trim(), // string
+          'description': _description.text.trim(),
           'isUrgent': _isUrgent,
           'schedule': schedule,
         }),
       );
 
       if (res.statusCode == 200) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text('Job updated')));
         Navigator.pop(context, true); // signal caller to refresh
       } else {
+        if (!mounted) return;
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('Error: ${res.body}')));
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Network error: $e')));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  @override
-  void dispose() {
-    _title.dispose();
-    _pay.dispose();
-    _description.dispose();
-    super.dispose();
   }
 
   @override
@@ -185,244 +235,91 @@ class _EditJobPageState extends State<EditJobPage> {
                     SwitchListTile(
                       title: const Text('Urgent'),
                       value: _isUrgent,
-                      onChanged: (value) {
-                        setState(() {
-                          _isUrgent = value;
-                        });
-                      },
+                      onChanged: (value) => setState(() => _isUrgent = value),
                     ),
-
                     const SizedBox(height: 20),
-                    // Days selection (Checkboxes)
+
+                    // Days
                     const Text("Select Days:"),
                     ...List.generate(7, (index) {
                       return CheckboxListTile(
-                        title: Text(
-                          ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][index],
-                        ),
+                        title: Text(_dayNames[index]),
                         value: selectedDays[index],
                         onChanged: (bool? value) {
                           setState(() {
-                            selectedDays[index] = value!;
+                            selectedDays[index] = value ?? false;
                           });
                         },
                       );
                     }),
 
-                    // Checkbox for same or different times
-                    CheckboxListTile(
-                      title: const Text("Same time for all selected days"),
-                      value: isSameTime,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          isSameTime = value!;
-                        });
-                      },
+                    const SizedBox(height: 12),
+
+                    // Single time block for ALL selected days
+                    const Text("Select Time for all days:"),
+                    const Text("Start Time:"),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        DropdownButton<int>(
+                          value: startHour.text.isEmpty ? 1 : int.parse(startHour.text),
+                          onChanged: (val) => setState(() => startHour.text = (val ?? 1).toString()),
+                          items: List.generate(12, (i) => DropdownMenuItem(
+                            value: i + 1, child: Text("${i + 1}"),
+                          )),
+                        ),
+                        DropdownButton<String>(
+                          value: startMinute.text.isEmpty ? '00' : startMinute.text,
+                          onChanged: (val) => setState(() => startMinute.text = val ?? '00'),
+                          items: const [
+                            DropdownMenuItem(value: '00', child: Text('00')),
+                            DropdownMenuItem(value: '30', child: Text('30')),
+                          ],
+                        ),
+                        DropdownButton<String>(
+                          value: startAmPm.text.isEmpty ? 'AM' : startAmPm.text,
+                          onChanged: (val) => setState(() => startAmPm.text = val ?? 'AM'),
+                          items: const [
+                            DropdownMenuItem(value: 'AM', child: Text('AM')),
+                            DropdownMenuItem(value: 'PM', child: Text('PM')),
+                          ],
+                        ),
+                      ],
                     ),
 
-                    // If Same time is checked, show one time selection
-                    if (isSameTime)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text("Select Time for all days:"),
-                          const Text("Start Time:"),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              DropdownButton<int>(
-                                value: startHour.text.isEmpty ? 1 : int.parse(startHour.text),
-                                onChanged: (val) {
-                                  setState(() {
-                                    startHour.text = val.toString();
-                                  });
-                                },
-                                items: List.generate(12, (i) {
-                                  return DropdownMenuItem(
-                                    value: i + 1,
-                                    child: Text("${i + 1}"),
-                                  );
-                                }),
-                              ),
-                              DropdownButton<String>(
-                                value: startMinute.text.isEmpty ? '00' : startMinute.text,
-                                onChanged: (val) {
-                                  setState(() {
-                                    startMinute.text = val!;
-                                  });
-                                },
-                                items: const [
-                                  DropdownMenuItem(value: '00', child: Text('00')),
-                                  DropdownMenuItem(value: '30', child: Text('30')),
-                                ],
-                              ),
-                              DropdownButton<String>(
-                                value: startAmPm.text.isEmpty ? 'AM' : startAmPm.text,
-                                onChanged: (val) {
-                                  setState(() {
-                                    startAmPm.text = val!;
-                                  });
-                                },
-                                items: const [
-                                  DropdownMenuItem(value: 'AM', child: Text('AM')),
-                                  DropdownMenuItem(value: 'PM', child: Text('PM')),
-                                ],
-                              ),
-                            ],
-                          ),
-                          const Text("End Time:"),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              DropdownButton<int>(
-                                value: startHour.text.isEmpty ? 1 : int.tryParse(startHour.text) ?? 1,
-                                onChanged: (val) {
-                                  setState(() {
-                                    startHour.text = val.toString();
-                                  });
-                                },
-                                items: List.generate(12, (i) {
-                                  return DropdownMenuItem(
-                                    value: i + 1,
-                                    child: Text("${i + 1}"),
-                                  );
-                                }),
-                              ),
-                              DropdownButton<String>(
-                                value: startMinute.text.isEmpty ? '00' : startMinute.text,
-                                onChanged: (val) {
-                                  setState(() {
-                                    startMinute.text = val!;
-                                  });
-                                },
-                                items: const [
-                                  DropdownMenuItem(value: '00', child: Text('00')),
-                                  DropdownMenuItem(value: '30', child: Text('30')),
-                                ],
-                              ),
-
-                              DropdownButton<String>(
-                                value: startAmPm.text.isEmpty ? 'AM' : startAmPm.text,
-                                onChanged: (val) {
-                                  setState(() {
-                                    startAmPm.text = val!;
-                                  });
-                                },
-                                items: const [
-                                  DropdownMenuItem(value: 'AM', child: Text('AM')),
-                                  DropdownMenuItem(value: 'PM', child: Text('PM')),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    // If Same time is not checked, show time selection for each day
-                    if (!isSameTime)
-                      ...List.generate(7, (index) {
-                        if (selectedDays[index]) {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Time for ${["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][index]}:"),
-                              const Text("Start Time:"),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  DropdownButton<int>(
-                                    value: startHour.text.isEmpty ? 1 : int.parse(startHour.text),
-                                    onChanged: (val) {
-                                      setState(() {
-                                        startHour.text = val.toString();
-                                      });
-                                    },
-                                    items: List.generate(12, (i) {
-                                      return DropdownMenuItem(
-                                        value: i + 1,
-                                        child: Text("${i + 1}"),
-                                      );
-                                    }),
-                                  ),
-                                  DropdownButton<String>(
-                                    value: startMinute.text.isEmpty ? '00' : startMinute.text,
-                                    onChanged: (val) {
-                                      setState(() {
-                                        startMinute.text = val!;
-                                      });
-                                    },
-                                    items: const [
-                                      DropdownMenuItem(value: '00', child: Text('00')),
-                                      DropdownMenuItem(value: '30', child: Text('30')),
-                                    ],
-                                  ),
-                                  DropdownButton<String>(
-                                    value: startAmPm.text.isEmpty ? 'AM' : startAmPm.text,
-                                    onChanged: (val) {
-                                      setState(() {
-                                        startAmPm.text = val!;
-                                      });
-                                    },
-                                    items: const [
-                                      DropdownMenuItem(value: 'AM', child: Text('AM')),
-                                      DropdownMenuItem(value: 'PM', child: Text('PM')),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              const Text("End Time:"),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  DropdownButton<int>(
-                                    value: endHour.text.isEmpty ? 1 : int.parse(endHour.text),
-                                    onChanged: (val) {
-                                      setState(() {
-                                        endHour.text = val.toString();
-                                      });
-                                    },
-                                    items: List.generate(12, (i) {
-                                      return DropdownMenuItem(
-                                        value: i + 1,
-                                        child: Text("${i + 1}"),
-                                      );
-                                    }),
-                                  ),
-                                  DropdownButton<String>(
-                                    value: endMinute.text.isEmpty ? '00' : endMinute.text,
-                                    onChanged: (val) {
-                                      setState(() {
-                                        endMinute.text = val!;
-                                      });
-                                    },
-                                    items: const [
-                                      DropdownMenuItem(value: '00', child: Text('00')),
-                                      DropdownMenuItem(value: '30', child: Text('30')),
-                                    ],
-                                  ),
-                                  DropdownButton<String>(
-                                    value: endAmPm.text.isEmpty ? 'AM' : endAmPm.text,
-                                    onChanged: (val) {
-                                      setState(() {
-                                        endAmPm.text = val!;
-                                      });
-                                    },
-                                    items: const [
-                                      DropdownMenuItem(value: 'AM', child: Text('AM')),
-                                      DropdownMenuItem(value: 'PM', child: Text('PM')),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ],
-                          );
-                        } else {
-                          return const SizedBox.shrink();
-                        }
-                      }),
+                    const Text("End Time:"),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        DropdownButton<int>(
+                          value: endHour.text.isEmpty ? 1 : int.parse(endHour.text),
+                          onChanged: (val) => setState(() => endHour.text = (val ?? 1).toString()),
+                          items: List.generate(12, (i) => DropdownMenuItem(
+                            value: i + 1, child: Text("${i + 1}"),
+                          )),
+                        ),
+                        DropdownButton<String>(
+                          value: endMinute.text.isEmpty ? '00' : endMinute.text,
+                          onChanged: (val) => setState(() => endMinute.text = val ?? '00'),
+                          items: const [
+                            DropdownMenuItem(value: '00', child: Text('00')),
+                            DropdownMenuItem(value: '30', child: Text('30')),
+                          ],
+                        ),
+                        DropdownButton<String>(
+                          value: endAmPm.text.isEmpty ? 'PM' : endAmPm.text,
+                          onChanged: (val) => setState(() => endAmPm.text = val ?? 'PM'),
+                          items: const [
+                            DropdownMenuItem(value: 'AM', child: Text('AM')),
+                            DropdownMenuItem(value: 'PM', child: Text('PM')),
+                          ],
+                        ),
+                      ],
+                    ),
 
                     const SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: _save,
+                      onPressed: _saving ? null : _save,
                       child: Text(_saving ? 'Saving...' : 'Save'),
                     ),
                   ],

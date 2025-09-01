@@ -1,5 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const Company = require('../db/models/Company');
 
 const router = express.Router();
@@ -77,6 +78,32 @@ router.delete('/', auth, requireCompany, async (req, res) => {
   const doc = await Company.findByIdAndDelete(id);
   if (!doc) return res.status(404).json({ error: 'Company not found' });
   res.json({ message: 'Deleted' });
+});
+
+
+// GET /api/company/:id  (public read)
+// Returns a subset of fields safe for public display
+router.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid company id' });
+    }
+
+    const company = await Company.findById(id)
+      .select('name description location contactInfo createdAt updatedAt')
+      .lean();
+
+    if (!company) {
+      return res.status(404).json({ error: 'Company not found' });
+    }
+
+    return res.json({ company });
+  } catch (err) {
+    console.error('GET /api/company/:id error:', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
 });
 
 module.exports = router;

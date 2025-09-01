@@ -43,4 +43,7 @@ const applicationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Enforce one unique application per (jobID, jobseekerID)
+applicationSchema.index({ jobID: 1, jobseekerID: 1 }, { unique: true });
+
 module.exports = mongoose.model("Application", applicationSchema);

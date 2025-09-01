@@ -44,16 +44,28 @@ router.post("/", auth, requireJobSeeker, async (req, res) => {
   try {
     const { jobID, name, description = '', resumeLink = '', address, contactInfo } = req.body;
 
-    // Log the decoded jobseekerID
-    // console.log("JobSeeker ID:", req.user.id); // Ensure the jobseeker ID is being passed
-
     if (!jobID || !name || !address || !contactInfo) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
+    // Optional: validate ObjectId
+    // if (!mongoose.Types.ObjectId.isValid(jobID)) {
+    //   return res.status(400).json({ message: "Invalid jobID" });
+    // }
+
+    // Fast pre-check to return a friendly message
+    const existing = await Application
+      .findOne({ jobID, jobseekerID: req.user.id })
+      .select('_id')
+      .lean();
+
+    if (existing) {
+      return res.status(409).json({ message: "You have already applied to this job." });
+    }
+
     const application = new Application({
       jobID,
-      jobseekerID: req.user.id, // jobseekerID should be assigned here
+      jobseekerID: req.user.id,
       name,
       description,
       resumeLink,
@@ -63,10 +75,15 @@ router.post("/", auth, requireJobSeeker, async (req, res) => {
     });
 
     const saved = await application.save();
-    res.status(201).json(saved);
+    return res.status(201).json(saved);
+
   } catch (error) {
+    // If two requests race, unique index guarantees prevention
+    if (error && error.code === 11000) {
+      return res.status(409).json({ message: "You have already applied to this job." });
+    }
     console.error("Application POST error:", error);
-    res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ message: "Server error" });
   }
 });
 

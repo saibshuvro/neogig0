@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:neogig0/widgets/custom_drawer.dart';
 import 'edit_job_page.dart';
 import 'create_application_page.dart';
+import 'company_public_page.dart';
 
 class JobPage extends StatefulWidget {
   final String userRole;
@@ -124,12 +125,14 @@ class _JobPageState extends State<JobPage> {
     }
   }
 
-  Widget _infoTile(String label, String value) {
+  Widget _infoTile(String label, String value, {VoidCallback? onTap}) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
         title: Text(label),
         subtitle: Text(value.isEmpty ? '-' : value),
+        onTap: onTap,
+        trailing: onTap != null ? const Icon(Icons.chevron_right) : null,
       ),
     );
   }
@@ -142,7 +145,15 @@ class _JobPageState extends State<JobPage> {
       return Center(child: Text(_error!));
     }
 
-    final companyName = _job['companyID']?['name'] ?? 'N/A';
+    final companyObj = _job['companyID'];
+    final companyName = companyObj?['name'] ?? 'N/A';
+    // Try to get an id whether the backend uses _id or id, or even a plain string
+    String? companyId;
+    if (companyObj is Map) {
+      companyId = (companyObj['_id'] ?? companyObj['id'])?.toString();
+    } else if (companyObj is String) {
+      companyId = companyObj; // sometimes relations are stored as string ids
+    }
     final title = _job['title'] ?? 'N/A';
     final pay = _job['pay'] ?? 'N/A';
     final description = _job['description'] ?? 'N/A';
@@ -157,7 +168,23 @@ class _JobPageState extends State<JobPage> {
       child: ListView(
         children: [
           _infoTile('Title', title),
-          _infoTile('Company', companyName),
+          _infoTile(
+            'Company',
+            companyName,
+            onTap: companyId == null
+                ? null
+                : () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CompanyPublicPage(
+                          userRole: widget.userRole,
+                          companyId: companyId!,
+                        ),
+                      ),
+                    );
+                  },
+          ),
           _infoTile('Pay', pay),
           _infoTile('Description', description),
           _infoTile('Posted On', postedOn),

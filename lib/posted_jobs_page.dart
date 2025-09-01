@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:neogig0/widgets/custom_drawer.dart';
 import 'job_page.dart';  // Import the JobPage
 import 'edit_job_page.dart';
+import 'applicants_page.dart';
 
 class PostedJobsPage extends StatefulWidget {
   final String userRole;
@@ -230,6 +231,12 @@ class _PostedJobsPageState extends State<PostedJobsPage> {
                       OutlinedButton(
                         onPressed: () {
                           // Navigate to Applicants page for this job
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ApplicantsPage(userRole: widget.userRole, jobId: id),
+                            ),
+                          );
                         },
                         child: const Text('Applicants'),
                       ),

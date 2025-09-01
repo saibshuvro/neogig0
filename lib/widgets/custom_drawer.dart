@@ -7,6 +7,7 @@ import 'package:neogig0/create_job_page.dart';
 import 'package:neogig0/posted_jobs_page.dart';
 import 'package:neogig0/home_page.dart';
 import 'package:neogig0/saved_jobs_page.dart';
+import 'package:neogig0/applied_jobs_page.dart';
 
 class CustomDrawer extends StatelessWidget {
   final String userRole; // Pass this variable to control visibility
@@ -75,6 +76,16 @@ class CustomDrawer extends StatelessWidget {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (_) => JobSeekerProfilePage(userRole: userRole)),
+                );
+              },
+            ),
+          if (userRole == 'JobSeeker')
+            ListTile(
+              title: const Text('Applied Jobs'),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => AppliedJobsPage(userRole: userRole)),
                 );
               },
             ),

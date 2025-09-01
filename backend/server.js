@@ -11,6 +11,7 @@ const companyRoutes = require('./routes/company');
 const jobSeekerRoutes = require('./routes/jobseeker');
 const jobRoutes = require('./routes/job');
 const savedJobRoutes = require('./routes/savedJob');
+const applicationRoutes = require('./routes/application');
 
 // Middleware
 app.use(cors());
@@ -24,6 +25,7 @@ app.use('/api/company', companyRoutes);
 app.use('/api/jobseeker', jobSeekerRoutes);
 app.use('/api/job', jobRoutes);
 app.use('/api/savedjob', savedJobRoutes);
+app.use('/api/application', applicationRoutes);
 
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI)

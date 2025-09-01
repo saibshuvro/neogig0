@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:neogig0/widgets/custom_drawer.dart';
 import 'edit_job_page.dart';
+import 'create_application_page.dart';
 
 class JobPage extends StatefulWidget {
   final String userRole;
@@ -175,38 +176,49 @@ class _JobPageState extends State<JobPage> {
           const SizedBox(height: 24),
           Row(
             children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () async {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => EditJobPage(userRole: widget.userRole, jobId: widget.jobId),
-                      ),
-                    );
-                  },
-                  child: const Text('Edit'),
+              if (widget.userRole == 'Company')
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EditJobPage(userRole: widget.userRole, jobId: widget.jobId),
+                        ),
+                      );
+                    },
+                    child: const Text('Edit'),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                  onPressed: () async {
-                    await _deleteJob(widget.jobId);  // Delete the job when pressed
-                  },
-                  child: const Text('Delete'),
+              if (widget.userRole == 'Company')
+                const SizedBox(width: 12),
+              if (widget.userRole == 'Company')
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                    onPressed: () async {
+                      await _deleteJob(widget.jobId);  // Delete the job when pressed
+                    },
+                    child: const Text('Delete'),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () async {
-                    // Add logic for "Apply" button if needed
-                  },
-                  child: const Text('Apply'),
+              if (widget.userRole == 'Company')
+                const SizedBox(width: 12),
+              if (widget.userRole == 'JobSeeker')
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      // Add logic for "Apply" button if needed
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CreateApplicationPage(userRole: widget.userRole, jobId: widget.jobId),
+                        ),
+                      );
+                    },
+                    child: const Text('Apply'),
+                  ),
                 ),
-              ),
             ],
           ),
         ],

@@ -12,7 +12,6 @@ This repository contains both the mobile application (frontend) built in **Flutt
 - **Job Applications**: Apply to jobs, track application status, and withdraw applications.
 - **Saved Jobs**: Save job listings for future reference.
 - **Profile Management**: Manage your job seeker profile, including personal information and resume.
-- **Job Alerts**: Set up alerts for new job postings matching your preferences.
   
 ### Company:
 - **Post Jobs**: Create job listings with descriptions, pay, and work hours.

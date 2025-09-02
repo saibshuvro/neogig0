@@ -185,7 +185,7 @@ class _JobPageState extends State<JobPage> {
                     );
                   },
           ),
-          _infoTile('Pay', pay),
+          _infoTile('Pay (per Hour)', pay),
           _infoTile('Description', description),
           _infoTile('Posted On', postedOn),
           _infoTile('Urgent', isUrgent ? 'Yes' : 'No'),

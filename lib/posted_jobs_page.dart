@@ -221,7 +221,7 @@ class _PostedJobsPageState extends State<PostedJobsPage> {
                             ?.copyWith(color: Colors.grey),
                       ),
                       if (pay.isNotEmpty)
-                        Text("Pay: $pay",
+                        Text("Pay (per Hour): $pay",
                             style: Theme.of(context).textTheme.bodySmall),
                     ],
                   ),

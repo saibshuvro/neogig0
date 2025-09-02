@@ -151,7 +151,7 @@ class _JobCardState extends State<JobCard> {
             Text("Company: ${widget.companyName}",
                 style: const TextStyle(
                     fontSize: 14, fontWeight: FontWeight.w500)),
-            Text("Pay: ${widget.pay}"),
+            Text("Pay (per Hour): ${widget.pay}"),
             if (widget.isUrgent)
               const Text("Urgent!",
                   style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),

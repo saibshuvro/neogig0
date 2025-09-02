@@ -223,7 +223,7 @@ class _EditJobPageState extends State<EditJobPage> {
                     ),
                     TextFormField(
                       controller: _pay,
-                      decoration: const InputDecoration(labelText: 'Pay'),
+                      decoration: const InputDecoration(labelText: 'Pay (per Hour)'),
                       keyboardType: TextInputType.number,
                       validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
                     ),

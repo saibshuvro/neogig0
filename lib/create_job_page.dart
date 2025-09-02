@@ -160,7 +160,7 @@ class _CreateJobPageState extends State<CreateJobPage> {
               ),
               TextFormField(
                 controller: _payController,
-                decoration: const InputDecoration(labelText: "Pay"),
+                decoration: const InputDecoration(labelText: "Pay (per Hour)"),
                 validator: (val) => val!.isEmpty ? "Required" : null,
               ),
               TextFormField(

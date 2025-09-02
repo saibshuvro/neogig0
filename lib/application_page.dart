@@ -84,7 +84,7 @@ class _ApplicationPageState extends State<ApplicationPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Application withdrawn!')),
           );
-          Navigator.pop(context, true); // Go back after withdrawal
+          Navigator.pop(context, true);  // Go back after withdrawal
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Error: ${res.body}')),
@@ -131,6 +131,17 @@ class _ApplicationPageState extends State<ApplicationPage> {
     }
   }
 
+  // Reusable info tile for displaying fields
+  Widget _infoTile(String label, String value) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        title: Text(label),
+        subtitle: Text(value.isEmpty ? '-' : value),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -149,24 +160,14 @@ class _ApplicationPageState extends State<ApplicationPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Job Title: ${_applicationDetails['jobID']['title']}',
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  Text('Name: ${_applicationDetails['name']}'),
-                  const SizedBox(height: 10),
-                  Text('Description: ${_applicationDetails['description']}'),
-                  const SizedBox(height: 10),
-                  Text('Resume Link: ${_applicationDetails['resumeLink']}'),
-                  const SizedBox(height: 10),
-                  Text('Address: ${_applicationDetails['address']}'),
-                  const SizedBox(height: 10),
-                  Text('Contact Info: ${_applicationDetails['contactInfo']}'),
-                  const SizedBox(height: 10),
-                  Text('Status: ${_applicationDetails['status']}'),
-                  const SizedBox(height: 10),
-                  Text('Applied On: ${_applicationDetails['appliedOn']}'),
+                  _infoTile('Job Title', _applicationDetails['jobID']['title'] ?? 'N/A'),
+                  _infoTile('Name', _applicationDetails['name'] ?? 'N/A'),
+                  _infoTile('Description', _applicationDetails['description'] ?? 'N/A'),
+                  _infoTile('Resume Link', _applicationDetails['resumeLink'] ?? 'N/A'),
+                  _infoTile('Address', _applicationDetails['address'] ?? 'N/A'),
+                  _infoTile('Contact Info', _applicationDetails['contactInfo'] ?? 'N/A'),
+                  _infoTile('Status', _applicationDetails['status'] ?? 'N/A'),
+                  _infoTile('Applied On', _applicationDetails['appliedOn'] ?? 'N/A'),
                   const SizedBox(height: 20),
                   if (widget.userRole == 'JobSeeker')
                     SizedBox(
@@ -177,7 +178,6 @@ class _ApplicationPageState extends State<ApplicationPage> {
                       ),
                     ),
                   if (widget.userRole == 'Company')
-                    // Add dropdown to change application status
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [

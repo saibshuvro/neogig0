@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:neogig0/widgets/custom_drawer.dart';
-import 'edit_company_page.dart';
+import 'package:neogig0/edit_company_page.dart';
 import 'package:neogig0/main.dart';
 
 class CompanyProfilePage extends StatefulWidget {
@@ -128,7 +128,7 @@ class _CompanyProfilePageState extends State<CompanyProfilePage> {
                           Expanded(
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red,
+                                backgroundColor: Colors.red.shade200,
                               ),
                               onPressed: () async {
                                 final ok = await showDialog<bool>(

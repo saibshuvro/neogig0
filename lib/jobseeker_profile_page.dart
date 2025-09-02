@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:neogig0/widgets/custom_drawer.dart';
-import 'edit_jobseeker_page.dart';
+import 'package:neogig0/edit_jobseeker_page.dart';
 import 'package:neogig0/main.dart';
 
 class JobSeekerProfilePage extends StatefulWidget {
@@ -124,7 +124,7 @@ class _JobSeekerProfilePageState extends State<JobSeekerProfilePage> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                              style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade200),
                               onPressed: () async {
                                 final ok = await showDialog<bool>(
                                   context: context,

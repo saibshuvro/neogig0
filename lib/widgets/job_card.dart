@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../job_page.dart';
+import 'package:neogig0/job_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class JobCard extends StatefulWidget {
@@ -165,7 +165,7 @@ class _JobCardState extends State<JobCard> {
                 if (widget.pageFrom == 'Home')
                   ElevatedButton(
                     onPressed: _saving ? null : _saveJob,
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                    //style: ElevatedButton.styleFrom(backgroundColor: Colors.lightGreenAccent.shade200),
                     child: _saving
                         ? const SizedBox(
                             width: 20,
@@ -178,7 +178,7 @@ class _JobCardState extends State<JobCard> {
                 if (widget.pageFrom == 'Saved')
                   ElevatedButton(
                     onPressed: _unsaving ? null : _unsaveJob,
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    //style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade200),
                     child: _unsaving
                         ? const SizedBox(
                             width: 20,

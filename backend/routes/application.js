@@ -1,13 +1,12 @@
 const express = require('express');
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
-const Job = require('../db/models/Job');
-const Company = require('../db/models/Company');
+// const Job = require('../db/models/Job');
+// const Company = require('../db/models/Company');
 const Application = require('../db/models/Application');
 
 const router = express.Router();
 
-// Minimal auth middleware (JWT in Authorization header)
 // Minimal auth middleware (JWT in Authorization header)
 function auth(req, res, next) {
   const h = req.headers.authorization || '';

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert'; // <-- added for JWT decode
-import 'login_page.dart';
-import 'home_page.dart';
+import 'package:neogig0/login_page.dart';
+import 'package:neogig0/home_page.dart';
 import 'package:neogig0/widgets/custom_drawer.dart';
 import 'package:neogig0/company_profile_page.dart';
 
@@ -60,7 +60,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'NeoGig',
-      theme: ThemeData(primarySwatch: Colors.green),
+      // theme: ThemeData(primarySwatch: Colors.green),
       // Decide the first page based on token/role
       home: (token != null && role != null)
           ? (role == 'Company'

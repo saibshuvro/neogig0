@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:neogig0/widgets/custom_drawer.dart';
-import 'edit_job_page.dart';
-import 'create_application_page.dart';
-import 'company_public_page.dart';
+import 'package:neogig0/edit_job_page.dart';
+import 'package:neogig0/create_application_page.dart';
+import 'package:neogig0/company_public_page.dart';
 
 class JobPage extends StatefulWidget {
   final String userRole;
@@ -222,7 +222,7 @@ class _JobPageState extends State<JobPage> {
               if (widget.userRole == 'Company')
                 Expanded(
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade300),
                     onPressed: () async {
                       await _deleteJob(widget.jobId);  // Delete the job when pressed
                     },

@@ -2,9 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-// import 'job_details_page.dart';  // Import the job details page
 import 'package:neogig0/widgets/custom_drawer.dart';
-import 'application_page.dart';
+import 'package:neogig0/application_page.dart';
 
 class AppliedJobsPage extends StatefulWidget {
   final String userRole;

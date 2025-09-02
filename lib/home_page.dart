@@ -1,11 +1,10 @@
-// home_page.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
-import '../widgets/job_card.dart';
-import '../widgets/custom_drawer.dart';
+import 'package:neogig0/widgets/job_card.dart';
+import 'package:neogig0/widgets/custom_drawer.dart';
 import 'package:flutter/services.dart';
 
 class HomePage extends StatefulWidget {

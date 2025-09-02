@@ -2,7 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const SavedJob = require('../db/models/SavedJob');
-const Job = require('../db/models/Job');
+// const Job = require('../db/models/Job');
 
 const router = express.Router();
 

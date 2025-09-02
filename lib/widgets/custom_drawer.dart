@@ -8,6 +8,8 @@ import 'package:neogig0/posted_jobs_page.dart';
 import 'package:neogig0/home_page.dart';
 import 'package:neogig0/saved_jobs_page.dart';
 import 'package:neogig0/applied_jobs_page.dart';
+import 'package:neogig0/about_us_page.dart';
+import 'package:neogig0/faq_page.dart';
 
 class CustomDrawer extends StatelessWidget {
   final String userRole; // Pass this variable to control visibility
@@ -102,13 +104,19 @@ class CustomDrawer extends StatelessWidget {
           ListTile(
             title: const Text('About Us'),
             onTap: () {
-              Navigator.pop(context);
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => AboutUsPage(userRole: userRole)),
+                );
             },
           ),
           ListTile(
             title: const Text('FAQ'),
             onTap: () {
-              Navigator.pop(context);
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => FaqPage(userRole: userRole)),
+                );
             },
           ),
           if (userRole == 'Company' || userRole == 'JobSeeker')
